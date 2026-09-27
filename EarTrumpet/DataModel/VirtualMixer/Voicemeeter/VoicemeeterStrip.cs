@@ -1,5 +1,7 @@
 using EarTrumpet.Extensions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace EarTrumpet.DataModel.VirtualMixer.Voicemeeter;
 
@@ -12,7 +14,7 @@ internal sealed class VoicemeeterStrip : BindableBase, IVirtualStrip
 
     // The Remote API applies writes asynchronously, so a read right after a write can return the old
     // value and make the slider jump back. Ignore remote values briefly after a local change.
-    private static readonly TimeSpan LocalChangeHold = TimeSpan.FromMilliseconds(300);
+    internal static readonly TimeSpan LocalChangeHold = TimeSpan.FromMilliseconds(300);
 
     private readonly VoicemeeterRemote _remote;
     private readonly string _param;
@@ -21,10 +23,11 @@ internal sealed class VoicemeeterStrip : BindableBase, IVirtualStrip
     private string _displayName;
     private float _gainDb;
     private bool _isMuted;
+    private readonly VoicemeeterRoute[] _routes;
     private DateTime _holdRemoteUntil;
 
     // windowsDeviceName is null for hardware strips.
-    public VoicemeeterStrip(VoicemeeterRemote remote, int index, string defaultName, string windowsDeviceName, int levelChannel)
+    public VoicemeeterStrip(VoicemeeterRemote remote, int index, string defaultName, string windowsDeviceName, int levelChannel, string[] busNames)
     {
         _remote = remote;
         _param = $"Strip[{index}]";
@@ -32,9 +35,11 @@ internal sealed class VoicemeeterStrip : BindableBase, IVirtualStrip
         _displayName = defaultName;
         _levelChannel = levelChannel;
         WindowsDeviceName = windowsDeviceName;
+        _routes = busNames.Select(bus => new VoicemeeterRoute(remote, _param, bus)).ToArray();
     }
 
     public string Id => $"Voicemeeter.{_param}";
+    public IReadOnlyList<IVirtualRoute> Routes => _routes;
     public string WindowsDeviceName { get; }
     public bool IsVirtual => WindowsDeviceName != null;
     public float PeakValue1 { get; private set; }
@@ -99,6 +104,11 @@ internal sealed class VoicemeeterStrip : BindableBase, IVirtualStrip
     {
         var label = _remote.GetString($"{_param}.Label");
         DisplayName = string.IsNullOrWhiteSpace(label) ? _defaultName : label;
+
+        foreach (var route in _routes)
+        {
+            route.RefreshParameters();
+        }
 
         if (DateTime.UtcNow < _holdRemoteUntil)
         {

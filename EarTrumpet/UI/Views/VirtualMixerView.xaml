@@ -7,6 +7,37 @@
              IsTabStop="False">
     <UserControl.Resources>
         <conv:VolumeToStringConverter x:Key="VolumeToStringConverter" />
+        <Style x:Key="RouteToggleStyle" TargetType="ToggleButton">
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Margin" Value="3,0,0,0" />
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="Opacity" Value="0.6" />
+            <Setter Property="Theme:Brush.Foreground" Value="Text" />
+            <Setter Property="Theme:Brush.BorderBrush" Value="Text" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border Padding="5,0,5,1"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                    <Setter Property="Theme:Brush.Background" Value="SystemAccent" />
+                    <Setter Property="Theme:Brush.BorderBrush" Value="SystemAccent" />
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="1" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
     <UserControl.Style>
         <Style TargetType="UserControl">
@@ -49,14 +80,34 @@
                                     Grid.ColumnSpan="3"
                                     Height="{DynamicResource Mutable_AppItemCellHeight}" />
 
-                            <TextBlock Grid.Column="1"
+                            <DockPanel Grid.Column="1"
                                        Grid.ColumnSpan="2"
-                                       Margin="0,4,0,-4"
-                                       Theme:Brush.Foreground="Text"
-                                       FontSize="{StaticResource {x:Static SystemFonts.MessageFontSizeKey}}"
-                                       Opacity="0.8"
-                                       Text="{Binding DisplayName}"
-                                       TextTrimming="CharacterEllipsis" />
+                                       Margin="0,4,12,-4">
+                                <!-- Output bus routing, e.g. A1 = speakers, B1 = virtual recording device. -->
+                                <ItemsControl DockPanel.Dock="Right"
+                                              Focusable="False"
+                                              IsTabStop="False"
+                                              ItemsSource="{Binding Routes}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <ToggleButton Content="{Binding Name}"
+                                                          IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                          Style="{StaticResource RouteToggleStyle}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock VerticalAlignment="Center"
+                                           Theme:Brush.Foreground="Text"
+                                           FontSize="{StaticResource {x:Static SystemFonts.MessageFontSizeKey}}"
+                                           Opacity="0.8"
+                                           Text="{Binding DisplayName}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </DockPanel>
 
                             <Button Grid.Row="1"
                                     Width="{DynamicResource Mutable_AppIconSize}"

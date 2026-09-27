@@ -1,4 +1,5 @@
 using EarTrumpet.DataModel.Audio;
+using System.Collections.Generic;
 
 namespace EarTrumpet.DataModel.VirtualMixer;
 
@@ -16,4 +17,7 @@ public interface IVirtualStrip : IStreamWithVolumeControl
 
     // Sets the strip gain in dB, independent of the app's linear/logarithmic setting.
     void SetGain(float gainDb);
+
+    // One per output bus, in the mixer's order.
+    IReadOnlyList<IVirtualRoute> Routes { get; }
 }
