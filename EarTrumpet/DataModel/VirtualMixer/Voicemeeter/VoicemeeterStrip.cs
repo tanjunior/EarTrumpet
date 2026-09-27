@@ -23,18 +23,20 @@ internal sealed class VoicemeeterStrip : BindableBase, IVirtualStrip
     private bool _isMuted;
     private DateTime _holdRemoteUntil;
 
-    public VoicemeeterStrip(VoicemeeterRemote remote, int index, string defaultName, bool isVirtual, int levelChannel)
+    // windowsDeviceName is null for hardware strips.
+    public VoicemeeterStrip(VoicemeeterRemote remote, int index, string defaultName, string windowsDeviceName, int levelChannel)
     {
         _remote = remote;
         _param = $"Strip[{index}]";
         _defaultName = defaultName;
         _displayName = defaultName;
         _levelChannel = levelChannel;
-        IsVirtual = isVirtual;
+        WindowsDeviceName = windowsDeviceName;
     }
 
     public string Id => $"Voicemeeter.{_param}";
-    public bool IsVirtual { get; }
+    public string WindowsDeviceName { get; }
+    public bool IsVirtual => WindowsDeviceName != null;
     public float PeakValue1 { get; private set; }
     public float PeakValue2 { get; private set; }
 
@@ -132,7 +134,7 @@ internal sealed class VoicemeeterStrip : BindableBase, IVirtualStrip
         PeakValue2 = right;
     }
 
-    private void SetGain(float gainDb)
+    public void SetGain(float gainDb)
     {
         gainDb = gainDb.Bound(MinGainDb, MaxGainDb);
         _holdRemoteUntil = DateTime.UtcNow + LocalChangeHold;

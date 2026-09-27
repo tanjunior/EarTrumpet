@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using EarTrumpet.DataModel.VirtualMixer;
 using EarTrumpet.DataModel.VirtualMixer.Voicemeeter;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Diagnosis;
@@ -116,6 +117,7 @@ public sealed partial class App : IDisposable
 
         var virtualMixerBackend = new VoicemeeterBackend();
         Exit += (_, __) => virtualMixerBackend.Dispose();
+        _ = new WindowsVolumeLink(deviceManager, virtualMixerBackend);
 
         _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings, new VirtualMixerViewModel(virtualMixerBackend));
         FlyoutWindow = new FlyoutWindow(_flyoutViewModel);

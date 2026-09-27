@@ -7,14 +7,19 @@ namespace EarTrumpet.DataModel.VirtualMixer.Voicemeeter;
 
 public sealed class VoicemeeterBackend : IVirtualMixerBackend
 {
-    private sealed record Edition(string Name, int HardwareStrips, string[] VirtualStripNames);
+    private sealed record VirtualStrip(string Name, string WindowsDeviceName);
+    private sealed record Edition(string Name, int HardwareStrips, VirtualStrip[] VirtualStrips);
+
+    private static readonly VirtualStrip Vaio = new("Voicemeeter VAIO", "Voicemeeter Input");
+    private static readonly VirtualStrip Aux = new("Voicemeeter AUX", "Voicemeeter AUX Input");
+    private static readonly VirtualStrip Vaio3 = new("Voicemeeter VAIO3", "Voicemeeter VAIO3 Input");
 
     // Keyed by VBVMR_GetVoicemeeterType. Hardware strips carry 2 level channels, virtual strips 8.
     private static readonly Dictionary<int, Edition> Editions = new()
     {
-        [1] = new("Voicemeeter", 2, ["Voicemeeter VAIO"]),
-        [2] = new("Voicemeeter Banana", 3, ["Voicemeeter VAIO", "Voicemeeter AUX"]),
-        [3] = new("Voicemeeter Potato", 5, ["Voicemeeter VAIO", "Voicemeeter AUX", "Voicemeeter VAIO3"]),
+        [1] = new("Voicemeeter", 2, [Vaio]),
+        [2] = new("Voicemeeter Banana", 3, [Vaio, Aux]),
+        [3] = new("Voicemeeter Potato", 5, [Vaio, Aux, Vaio3]),
     };
 
     private readonly VoicemeeterRemote _remote;
@@ -92,9 +97,9 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
     private VoicemeeterStrip[] CreateStrips(Edition edition)
     {
         var hardware = Enumerable.Range(0, edition.HardwareStrips)
-            .Select(i => new VoicemeeterStrip(_remote, i, $"Hardware Input {i + 1}", isVirtual: false, levelChannel: i * 2));
-        var virtualStrips = edition.VirtualStripNames
-            .Select((name, i) => new VoicemeeterStrip(_remote, edition.HardwareStrips + i, name, isVirtual: true,
+            .Select(i => new VoicemeeterStrip(_remote, i, $"Hardware Input {i + 1}", windowsDeviceName: null, levelChannel: i * 2));
+        var virtualStrips = edition.VirtualStrips
+            .Select((strip, i) => new VoicemeeterStrip(_remote, edition.HardwareStrips + i, strip.Name, strip.WindowsDeviceName,
                 levelChannel: edition.HardwareStrips * 2 + i * 8));
         return [.. hardware, .. virtualStrips];
     }

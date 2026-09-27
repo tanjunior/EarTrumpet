@@ -10,4 +10,10 @@ public interface IVirtualStrip : IStreamWithVolumeControl
 
     // True for virtual inputs (e.g. "Voicemeeter VAIO"), false for hardware inputs.
     bool IsVirtual { get; }
+
+    // The Windows playback device that feeds this strip (e.g. "Voicemeeter Input"), or null.
+    string WindowsDeviceName { get; }
+
+    // Sets the strip gain in dB, independent of the app's linear/logarithmic setting.
+    void SetGain(float gainDb);
 }
