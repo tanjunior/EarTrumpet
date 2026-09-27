@@ -123,10 +123,13 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Style>
-                    <ItemsControl Name="DevicesList"
-                                  FocusVisualStyle="{x:Null}"
-                                  IsTabStop="False"
-                                  ItemsSource="{Binding Devices}" />
+                    <StackPanel>
+                        <ItemsControl Name="DevicesList"
+                                      FocusVisualStyle="{x:Null}"
+                                      IsTabStop="False"
+                                      ItemsSource="{Binding Devices}" />
+                        <views:VirtualMixerView DataContext="{Binding VirtualMixer}" />
+                    </StackPanel>
                     <Button Height="{DynamicResource Mutable_DeviceTitleCellHeight}"
                             Command="{Binding ExpandCollapse}"
                             IsEnabled="{Binding CanExpand}">

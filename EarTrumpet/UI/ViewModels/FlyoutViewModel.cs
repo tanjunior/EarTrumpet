@@ -26,6 +26,7 @@ public class FlyoutViewModel : BindableBase, IPopupHostViewModel, IFlyoutViewMod
     public ICommand ExpandCollapse { get; private set; }
     public InputType LastInput { get; private set; }
     public ICommand DisplaySettingsChanged { get; }
+    public VirtualMixerViewModel VirtualMixer { get; }
 
     private readonly DeviceCollectionViewModel _mainViewModel;
     private readonly DispatcherTimer _deBounceTimer;
@@ -36,8 +37,13 @@ public class FlyoutViewModel : BindableBase, IPopupHostViewModel, IFlyoutViewMod
     private MouseHook _mh;
     private Rect _winRect;
 
-    public FlyoutViewModel(DeviceCollectionViewModel mainViewModel, Action returnFocusToTray, AppSettings settings)
+    public FlyoutViewModel(DeviceCollectionViewModel mainViewModel, Action returnFocusToTray, AppSettings settings, VirtualMixerViewModel virtualMixer)
     {
+        // Subscribed before FlyoutWindow so the mixer polls (and adds its strips) before the window measures itself.
+        VirtualMixer = virtualMixer;
+        VirtualMixer.StripsChanged += (_, __) => InvalidateWindowSize();
+        StateChanged += (_, __) => VirtualMixer.IsVisible = State is FlyoutViewState.Opening or FlyoutViewState.Open;
+
         _settings = settings;
         IsExpanded = _settings.IsExpanded;
         Dialog = new ModalDialogViewModel();

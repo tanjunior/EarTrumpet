@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using EarTrumpet.DataModel.VirtualMixer.Voicemeeter;
 using EarTrumpet.DataModel.WindowsAudio;
 using EarTrumpet.Diagnosis;
 using EarTrumpet.Extensibility;
@@ -113,7 +114,10 @@ public sealed partial class App : IDisposable
         Exit += (_, __) => _trayIcon.IsVisible = false;
         CollectionViewModel.TrayPropertyChanged += () => UpdateTrayTooltip();
 
-        _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings);
+        var virtualMixerBackend = new VoicemeeterBackend();
+        Exit += (_, __) => virtualMixerBackend.Dispose();
+
+        _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings, new VirtualMixerViewModel(virtualMixerBackend));
         FlyoutWindow = new FlyoutWindow(_flyoutViewModel);
         // Initialize the FlyoutWindow last because its Show/Hide cycle will pump messages, causing UI frames
         // to be executed, breaking the assumption that startup is complete.
