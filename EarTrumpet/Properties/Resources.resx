@@ -661,6 +661,18 @@ Open [https://eartrumpet.app/jmp/fixstartup] to resolve this?</value>
   <data name="MouseSettingsPageText" xml:space="preserve">
     <value>Mouse settings</value>
   </data>
+  <data name="DevicesSettingsPageText" xml:space="preserve">
+    <value>Devices</value>
+  </data>
+  <data name="SettingsDeviceVisibilityDescription" xml:space="preserve">
+    <value>Choose which playback devices appear in EarTrumpet. The default device is always shown.</value>
+  </data>
+  <data name="SettingsHideUnusedVirtualMixerDevices" xml:space="preserve">
+    <value>Automatically hide unused Voicemeeter devices</value>
+  </data>
+  <data name="SettingsDeviceAutoHiddenText" xml:space="preserve">
+    <value>Hidden automatically (unused by Voicemeeter)</value>
+  </data>
   <data name="SettingsUseScrollWheelInTray" xml:space="preserve">
     <value>Use the scroll wheel to change volume while hovering over the EarTrumpet icon</value>
   </data>

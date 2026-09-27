@@ -11,6 +11,7 @@ public class AppSettings
 {
     public event EventHandler<bool> UseLegacyIconChanged;
     public event EventHandler<EventArgs> UseLogarithmicVolumeChanged;
+    public event EventHandler<EventArgs> DeviceVisibilityChanged;
     public event Action FlyoutHotkeyTyped;
     public event Action MixerHotkeyTyped;
     public event Action SettingsHotkeyTyped;
@@ -175,6 +176,27 @@ public class AppSettings
         {
             _settings.Set("LogarithmicVolumeMinDb", value);
             UseLogarithmicVolumeChanged?.Invoke(this, new EventArgs());
+        }
+    }
+
+    // Endpoint IDs of playback devices the user chose to hide.
+    public string[] HiddenDeviceIds
+    {
+        get => _settings.Get("HiddenDeviceIds", Array.Empty<string>());
+        set
+        {
+            _settings.Set("HiddenDeviceIds", value);
+            DeviceVisibilityChanged?.Invoke(this, new EventArgs());
+        }
+    }
+
+    public bool HideUnusedVirtualMixerDevices
+    {
+        get => _settings.Get("HideUnusedVirtualMixerDevices", true);
+        set
+        {
+            _settings.Set("HideUnusedVirtualMixerDevices", value);
+            DeviceVisibilityChanged?.Invoke(this, new EventArgs());
         }
     }
 

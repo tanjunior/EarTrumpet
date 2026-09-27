@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using EarTrumpet.DataModel.Audio;
 using EarTrumpet.DataModel.VirtualMixer;
 using EarTrumpet.DataModel.VirtualMixer.Voicemeeter;
 using EarTrumpet.DataModel.WindowsAudio;
@@ -58,6 +59,7 @@ public sealed partial class App : IDisposable
 
     private static readonly Stopwatch s_appTimer = Stopwatch.StartNew();
     private FlyoutViewModel _flyoutViewModel;
+    private IVirtualMixerBackend _virtualMixerBackend;
 
     private ShellNotifyIcon _trayIcon;
     private WindowHolder _mixerWindow;
@@ -115,16 +117,19 @@ public sealed partial class App : IDisposable
         Exit += (_, __) => _trayIcon.IsVisible = false;
         CollectionViewModel.TrayPropertyChanged += () => UpdateTrayTooltip();
 
-        var virtualMixerBackend = new VoicemeeterBackend();
-        Exit += (_, __) => virtualMixerBackend.Dispose();
-        _ = new WindowsVolumeLink(deviceManager, virtualMixerBackend);
+        _virtualMixerBackend = new VoicemeeterBackend();
+        Exit += (_, __) => _virtualMixerBackend.Dispose();
+        _ = new WindowsVolumeLink(deviceManager, _virtualMixerBackend);
 
-        _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings, new VirtualMixerViewModel(virtualMixerBackend));
+        _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings, new VirtualMixerViewModel(_virtualMixerBackend));
         FlyoutWindow = new FlyoutWindow(_flyoutViewModel);
 
-        CollectionViewModel.SetHiddenDeviceFilter(device => virtualMixerBackend.IsUnusedDevice(device.DisplayName));
-        virtualMixerBackend.UsedDevicesChanged += (_, __) => CollectionViewModel.RefreshHiddenDevices();
-        virtualMixerBackend.Update(includeLevels: false);
+        CollectionViewModel.SetHiddenDeviceFilter(device =>
+            Settings.HiddenDeviceIds.Contains(device.Id) ||
+            (Settings.HideUnusedVirtualMixerDevices && IsUnusedVirtualMixerDevice(device)));
+        _virtualMixerBackend.UsedDevicesChanged += (_, __) => CollectionViewModel.RefreshHiddenDevices();
+        Settings.DeviceVisibilityChanged += (_, __) => CollectionViewModel.RefreshHiddenDevices();
+        _virtualMixerBackend.Update(includeLevels: false);
         // Initialize the FlyoutWindow last because its Show/Hide cycle will pump messages, causing UI frames
         // to be executed, breaking the assumption that startup is complete.
         FlyoutWindow.Initialize();
@@ -367,8 +372,13 @@ public sealed partial class App : IDisposable
         return ret;
     }
 
+    private bool IsUnusedVirtualMixerDevice(IAudioDevice device) => _virtualMixerBackend.IsUnusedDevice(device.DisplayName);
+
     private Window CreateSettingsExperience()
     {
+        // Refresh which devices the mixer uses so the Devices page labels are current.
+        _virtualMixerBackend.Update(includeLevels: false);
+
         var defaultCategory = new SettingsCategoryViewModel(
             EarTrumpet.Properties.Resources.SettingsCategoryTitle,
             "\xE71D",
@@ -377,6 +387,7 @@ public sealed partial class App : IDisposable
             [
                 new EarTrumpetShortcutsPageViewModel(Settings),
                 new EarTrumpetMouseSettingsPageViewModel(Settings),
+                new EarTrumpetDevicesSettingsPageViewModel(Settings, WindowsAudioFactory.Create(AudioDeviceKind.Playback), IsUnusedVirtualMixerDevice),
                 new EarTrumpetCommunitySettingsPageViewModel(Settings),
                 new EarTrumpetLegacySettingsPageViewModel(Settings),
                 new EarTrumpetAboutPageViewModel(_errorReporter.DisplayDiagnosticData, Settings)

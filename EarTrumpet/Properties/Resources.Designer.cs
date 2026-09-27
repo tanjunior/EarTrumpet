@@ -882,6 +882,42 @@ namespace EarTrumpet.Properties {
                 return ResourceManager.GetString("MouseSettingsPageText", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Devices.
+        /// </summary>
+        public static string DevicesSettingsPageText {
+            get {
+                return ResourceManager.GetString("DevicesSettingsPageText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Choose which playback devices appear in EarTrumpet. The default device is always shown..
+        /// </summary>
+        public static string SettingsDeviceVisibilityDescription {
+            get {
+                return ResourceManager.GetString("SettingsDeviceVisibilityDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Automatically hide unused Voicemeeter devices.
+        /// </summary>
+        public static string SettingsHideUnusedVirtualMixerDevices {
+            get {
+                return ResourceManager.GetString("SettingsHideUnusedVirtualMixerDevices", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hidden automatically (unused by Voicemeeter).
+        /// </summary>
+        public static string SettingsDeviceAutoHiddenText {
+            get {
+                return ResourceManager.GetString("SettingsDeviceAutoHiddenText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Assign this app to a playback device.
