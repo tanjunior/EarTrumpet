@@ -60,6 +60,7 @@ public sealed partial class App : IDisposable
     private static readonly Stopwatch s_appTimer = Stopwatch.StartNew();
     private FlyoutViewModel _flyoutViewModel;
     private IVirtualMixerBackend _virtualMixerBackend;
+    private VirtualMixerViewModel _virtualMixerViewModel;
 
     private ShellNotifyIcon _trayIcon;
     private WindowHolder _mixerWindow;
@@ -121,7 +122,8 @@ public sealed partial class App : IDisposable
         Exit += (_, __) => _virtualMixerBackend.Dispose();
         _ = new WindowsVolumeLink(deviceManager, _virtualMixerBackend);
 
-        _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings, new VirtualMixerViewModel(_virtualMixerBackend));
+        _virtualMixerViewModel = new VirtualMixerViewModel(_virtualMixerBackend);
+        _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings, _virtualMixerViewModel);
         FlyoutWindow = new FlyoutWindow(_flyoutViewModel);
 
         CollectionViewModel.SetHiddenDeviceFilter(device =>
@@ -388,6 +390,7 @@ public sealed partial class App : IDisposable
                 new EarTrumpetShortcutsPageViewModel(Settings),
                 new EarTrumpetMouseSettingsPageViewModel(Settings),
                 new EarTrumpetDevicesSettingsPageViewModel(Settings, WindowsAudioFactory.Create(AudioDeviceKind.Playback), IsUnusedVirtualMixerDevice),
+                new EarTrumpetVirtualMixerSettingsPageViewModel(_virtualMixerBackend),
                 new EarTrumpetCommunitySettingsPageViewModel(Settings),
                 new EarTrumpetLegacySettingsPageViewModel(Settings),
                 new EarTrumpetAboutPageViewModel(_errorReporter.DisplayDiagnosticData, Settings)
@@ -419,7 +422,7 @@ public sealed partial class App : IDisposable
         return category;
     }
 
-    private Window CreateMixerExperience() => new FullWindow { DataContext = new FullWindowViewModel(CollectionViewModel) };
+    private Window CreateMixerExperience() => new FullWindow { DataContext = new FullWindowViewModel(CollectionViewModel, _virtualMixerViewModel) };
 
     public void Dispose()
     {

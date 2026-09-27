@@ -24,6 +24,8 @@ internal sealed class VoicemeeterRemote
     [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
     private delegate int GetStringWFn([MarshalAs(UnmanagedType.LPStr)] string name, StringBuilder value);
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+    private delegate int SetStringWFn([MarshalAs(UnmanagedType.LPStr)] string name, [MarshalAs(UnmanagedType.LPWStr)] string value);
+    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     private delegate int GetLevelFn(int type, int channel, out float value);
 
     private readonly NoArgsFn _login;
@@ -33,6 +35,7 @@ internal sealed class VoicemeeterRemote
     private readonly GetFloatFn _getParameterFloat;
     private readonly SetFloatFn _setParameterFloat;
     private readonly GetStringWFn _getParameterStringW;
+    private readonly SetStringWFn _setParameterStringW;
     private readonly GetLevelFn _getLevel;
 
     private VoicemeeterRemote(IntPtr module)
@@ -44,6 +47,7 @@ internal sealed class VoicemeeterRemote
         _getParameterFloat = Export<GetFloatFn>(module, "VBVMR_GetParameterFloat");
         _setParameterFloat = Export<SetFloatFn>(module, "VBVMR_SetParameterFloat");
         _getParameterStringW = Export<GetStringWFn>(module, "VBVMR_GetParameterStringW");
+        _setParameterStringW = Export<SetStringWFn>(module, "VBVMR_SetParameterStringW");
         _getLevel = Export<GetLevelFn>(module, "VBVMR_GetLevel");
     }
 
@@ -99,6 +103,8 @@ internal sealed class VoicemeeterRemote
         var value = new StringBuilder(512);
         return _getParameterStringW(name, value) == 0 ? value.ToString() : null;
     }
+
+    public void SetString(string name, string value) => _setParameterStringW(name, value);
 
     // type: 0 = pre-fader input, 1 = post-fader input, 2 = post-mute input, 3 = output. Linear amplitude.
     public float GetLevel(int type, int channel) => _getLevel(type, channel, out var value) == 0 ? value : 0f;

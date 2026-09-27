@@ -12,7 +12,10 @@ public interface IVirtualMixerBackend : IDisposable
 
     IReadOnlyList<IVirtualStrip> Strips { get; }
 
-    // Raised when Strips is replaced (connect, disconnect, or a different mixer edition started).
+    // Output buses, in the mixer's order. Replaced together with Strips.
+    IReadOnlyList<IVirtualBus> Buses { get; }
+
+    // Raised when Strips and Buses are replaced (connect, disconnect, or a different mixer edition started).
     event EventHandler StripsChanged;
 
     // Raised when the result of IsUnusedDevice may have changed.

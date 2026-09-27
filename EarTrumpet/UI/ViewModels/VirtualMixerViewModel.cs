@@ -10,7 +10,8 @@ public class VirtualMixerViewModel : BindableBase
 {
     private readonly IVirtualMixerBackend _backend;
     private readonly DispatcherTimer _pollTimer;
-    private bool _isVisible;
+    private bool _isFlyoutVisible;
+    private bool _isFullWindowVisible;
 
     public VirtualMixerViewModel(IVirtualMixerBackend backend)
     {
@@ -27,22 +28,35 @@ public class VirtualMixerViewModel : BindableBase
     public string DisplayName => _backend.DisplayName;
     public bool HasStrips => Strips.Count > 0;
 
-    public bool IsVisible
+    public bool IsFlyoutVisible
     {
-        get => _isVisible;
+        get => _isFlyoutVisible;
         set
         {
-            if (_isVisible != value)
-            {
-                _isVisible = value;
-                _pollTimer.IsEnabled = value;
-                if (value)
-                {
-                    // Poll synchronously so strips exist before the flyout measures itself.
-                    Poll();
-                }
-            }
+            _isFlyoutVisible = value;
+            UpdatePolling();
         }
+    }
+
+    public bool IsFullWindowVisible
+    {
+        get => _isFullWindowVisible;
+        set
+        {
+            _isFullWindowVisible = value;
+            UpdatePolling();
+        }
+    }
+
+    private void UpdatePolling()
+    {
+        var shouldPoll = _isFlyoutVisible || _isFullWindowVisible;
+        if (shouldPoll && !_pollTimer.IsEnabled)
+        {
+            // Poll synchronously so strips exist before the window measures itself.
+            Poll();
+        }
+        _pollTimer.IsEnabled = shouldPoll;
     }
 
     private void Poll()

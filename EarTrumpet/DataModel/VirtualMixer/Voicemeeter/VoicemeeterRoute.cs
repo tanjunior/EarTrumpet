@@ -9,14 +9,14 @@ internal sealed class VoicemeeterRoute : BindableBase, IVirtualRoute
     private bool _isEnabled;
     private DateTime _holdRemoteUntil;
 
-    public VoicemeeterRoute(VoicemeeterRemote remote, string stripParam, string busName)
+    public VoicemeeterRoute(VoicemeeterRemote remote, string stripParam, IVirtualBus bus)
     {
         _remote = remote;
-        _param = $"{stripParam}.{busName}";
-        Name = busName;
+        _param = $"{stripParam}.{bus.Name}";
+        Bus = bus;
     }
 
-    public string Name { get; }
+    public IVirtualBus Bus { get; }
 
     public bool IsEnabled
     {

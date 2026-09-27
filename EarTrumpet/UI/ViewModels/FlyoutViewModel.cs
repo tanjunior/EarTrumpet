@@ -42,7 +42,7 @@ public class FlyoutViewModel : BindableBase, IPopupHostViewModel, IFlyoutViewMod
         // Subscribed before FlyoutWindow so the mixer polls (and adds its strips) before the window measures itself.
         VirtualMixer = virtualMixer;
         VirtualMixer.StripsChanged += (_, __) => InvalidateWindowSize();
-        StateChanged += (_, __) => VirtualMixer.IsVisible = State is FlyoutViewState.Opening or FlyoutViewState.Open;
+        StateChanged += (_, __) => VirtualMixer.IsFlyoutVisible = State is FlyoutViewState.Opening or FlyoutViewState.Open;
 
         _settings = settings;
         IsExpanded = _settings.IsExpanded;

@@ -30,6 +30,7 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
     private readonly bool _isLoggedIn;
     private Edition _edition;
     private VoicemeeterStrip[] _strips = [];
+    private VoicemeeterBus[] _buses = [];
     private HashSet<string> _usedDevices = [];
 
     public VoicemeeterBackend()
@@ -51,6 +52,7 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
 
     public string DisplayName => _edition?.Name;
     public IReadOnlyList<IVirtualStrip> Strips => _strips;
+    public IReadOnlyList<IVirtualBus> Buses => _buses;
 
     public bool IsUnusedDevice(string deviceDisplayName) =>
         _edition != null &&
@@ -70,6 +72,7 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
         if (isNewEdition)
         {
             _edition = edition;
+            _buses = edition == null ? [] : edition.Buses.Select((name, i) => new VoicemeeterBus(_remote, i, name)).ToArray();
             _strips = edition == null ? [] : CreateStrips(edition);
             StripsChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -89,6 +92,10 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
             foreach (var strip in _strips)
             {
                 strip.RefreshParameters();
+            }
+            foreach (var bus in _buses)
+            {
+                bus.RefreshParameters();
             }
             SetUsedDevices(ReadUsedDevices());
         }
@@ -141,10 +148,10 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
     private VoicemeeterStrip[] CreateStrips(Edition edition)
     {
         var hardware = Enumerable.Range(0, edition.HardwareStrips)
-            .Select(i => new VoicemeeterStrip(_remote, i, $"Hardware Input {i + 1}", windowsDeviceName: null, levelChannel: i * 2, edition.Buses));
+            .Select(i => new VoicemeeterStrip(_remote, i, $"Hardware Input {i + 1}", windowsDeviceName: null, levelChannel: i * 2, _buses));
         var virtualStrips = edition.VirtualStrips
             .Select((strip, i) => new VoicemeeterStrip(_remote, edition.HardwareStrips + i, strip.Name, strip.WindowsDeviceName,
-                levelChannel: edition.HardwareStrips * 2 + i * 8, edition.Buses));
+                levelChannel: edition.HardwareStrips * 2 + i * 8, _buses));
         return [.. hardware, .. virtualStrips];
     }
 }

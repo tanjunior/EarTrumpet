@@ -673,6 +673,15 @@ Open [https://eartrumpet.app/jmp/fixstartup] to resolve this?</value>
   <data name="SettingsDeviceAutoHiddenText" xml:space="preserve">
     <value>Hidden automatically (unused by Voicemeeter)</value>
   </data>
+  <data name="VirtualMixerSettingsPageText" xml:space="preserve">
+    <value>Voicemeeter</value>
+  </data>
+  <data name="SettingsVirtualMixerBusesDescription" xml:space="preserve">
+    <value>Name Voicemeeter's output buses. Names are saved in Voicemeeter and shown on the routing buttons in the flyout.</value>
+  </data>
+  <data name="SettingsVirtualMixerNotRunningText" xml:space="preserve">
+    <value>Start Voicemeeter, then reopen Settings to name its buses.</value>
+  </data>
   <data name="SettingsUseScrollWheelInTray" xml:space="preserve">
     <value>Use the scroll wheel to change volume while hovering over the EarTrumpet icon</value>
   </data>

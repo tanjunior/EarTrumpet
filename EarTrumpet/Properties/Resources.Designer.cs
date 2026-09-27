@@ -918,6 +918,33 @@ namespace EarTrumpet.Properties {
                 return ResourceManager.GetString("SettingsDeviceAutoHiddenText", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Voicemeeter.
+        /// </summary>
+        public static string VirtualMixerSettingsPageText {
+            get {
+                return ResourceManager.GetString("VirtualMixerSettingsPageText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Name Voicemeeter&apos;s output buses. Names are saved in Voicemeeter and shown on the routing buttons in the flyout..
+        /// </summary>
+        public static string SettingsVirtualMixerBusesDescription {
+            get {
+                return ResourceManager.GetString("SettingsVirtualMixerBusesDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Start Voicemeeter, then reopen Settings to name its buses..
+        /// </summary>
+        public static string SettingsVirtualMixerNotRunningText {
+            get {
+                return ResourceManager.GetString("SettingsVirtualMixerNotRunningText", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Assign this app to a playback device.

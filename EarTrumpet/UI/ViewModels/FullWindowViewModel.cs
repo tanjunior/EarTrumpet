@@ -14,15 +14,18 @@ public class FullWindowViewModel : BindableBase, IPopupHostViewModel
     public ModalDialogViewModel Dialog { get; }
     public ICommand DisplaySettingsChanged { get; }
     public bool IsManyDevicesMode => AllDevices.Count > SmallDeviceCountLimit;
+    public VirtualMixerViewModel VirtualMixer { get; }
 
     private readonly DeviceCollectionViewModel _mainViewModel;
     private WindowViewState _state;
 
-    public FullWindowViewModel(DeviceCollectionViewModel mainViewModel)
+    public FullWindowViewModel(DeviceCollectionViewModel mainViewModel, VirtualMixerViewModel virtualMixer)
     {
         Dialog = new ModalDialogViewModel();
         _mainViewModel = mainViewModel;
         _mainViewModel.OnFullWindowOpened();
+        VirtualMixer = virtualMixer;
+        VirtualMixer.IsFullWindowVisible = true;
         _mainViewModel.AllDevices.CollectionChanged += OnDevicesChanged;
 
         DisplaySettingsChanged = new RelayCommand(() => Dialog.IsVisible = false);
@@ -68,6 +71,7 @@ public class FullWindowViewModel : BindableBase, IPopupHostViewModel
 
                 Dialog.IsVisible = false;
                 _mainViewModel.OnFullWindowClosed();
+                VirtualMixer.IsFullWindowVisible = false;
 
                 var window = (Window)sender;
                 WindowAnimationLibrary.BeginWindowExitAnimation(window, () =>

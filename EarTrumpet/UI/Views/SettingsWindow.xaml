@@ -174,6 +174,43 @@
                           IsChecked="{Binding UseGlobalMouseWheelHook, Mode=TwoWay}" />
             </StackPanel>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:EarTrumpetVirtualMixerSettingsPageViewModel}">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Style="{StaticResource BodyText}" Text="{x:Static resx:Resources.SettingsVirtualMixerBusesDescription}" />
+                <TextBlock Text="{x:Static resx:Resources.SettingsVirtualMixerNotRunningText}">
+                    <TextBlock.Style>
+                        <Style BasedOn="{StaticResource BodyText}" TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsConnected}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <ItemsControl Focusable="False" IsTabStop="False" ItemsSource="{Binding Buses}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,4,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200" />
+                                    <ColumnDefinition Width="220" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center"
+                                           Style="{StaticResource BodyText}"
+                                           Text="{Binding Description}"
+                                           TextTrimming="CharacterEllipsis"
+                                           ToolTip="{Binding Description}" />
+                                <TextBox Grid.Column="1"
+                                         VerticalAlignment="Center"
+                                         MaxLength="32"
+                                         Text="{Binding Label, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:EarTrumpetDevicesSettingsPageViewModel}">
             <StackPanel Orientation="Vertical">
                 <CheckBox HorizontalAlignment="Left"

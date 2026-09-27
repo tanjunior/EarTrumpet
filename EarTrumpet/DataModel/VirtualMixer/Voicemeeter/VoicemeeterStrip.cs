@@ -27,7 +27,7 @@ internal sealed class VoicemeeterStrip : BindableBase, IVirtualStrip
     private DateTime _holdRemoteUntil;
 
     // windowsDeviceName is null for hardware strips.
-    public VoicemeeterStrip(VoicemeeterRemote remote, int index, string defaultName, string windowsDeviceName, int levelChannel, string[] busNames)
+    public VoicemeeterStrip(VoicemeeterRemote remote, int index, string defaultName, string windowsDeviceName, int levelChannel, IEnumerable<IVirtualBus> buses)
     {
         _remote = remote;
         _param = $"Strip[{index}]";
@@ -35,7 +35,7 @@ internal sealed class VoicemeeterStrip : BindableBase, IVirtualStrip
         _displayName = defaultName;
         _levelChannel = levelChannel;
         WindowsDeviceName = windowsDeviceName;
-        _routes = busNames.Select(bus => new VoicemeeterRoute(remote, _param, bus)).ToArray();
+        _routes = buses.Select(bus => new VoicemeeterRoute(remote, _param, bus)).ToArray();
     }
 
     public string Id => $"Voicemeeter.{_param}";

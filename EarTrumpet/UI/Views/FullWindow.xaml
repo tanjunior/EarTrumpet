@@ -198,13 +198,18 @@
                                 <RowDefinition Height="*" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <ItemsControl IsTabStop="False" ItemsSource="{Binding AllDevices}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                            </ItemsControl>
+                            <StackPanel Orientation="Horizontal">
+                                <views:VirtualMixerView Width="{StaticResource WindowAndItemSize}"
+                                                        VerticalAlignment="Top"
+                                                        DataContext="{Binding VirtualMixer}" />
+                                <ItemsControl IsTabStop="False" ItemsSource="{Binding AllDevices}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
                             <Border Grid.Row="1" Theme:Brush.Background="Background">
                                 <Border.Style>
                                     <Style TargetType="{x:Type Border}">
