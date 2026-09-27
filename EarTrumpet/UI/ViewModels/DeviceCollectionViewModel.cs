@@ -30,6 +30,7 @@ public class DeviceCollectionViewModel : BindableBase, IDisposable
     private bool _isFlyoutVisible;
     private bool _isFullWindowVisible;
     private bool disposedValue;
+    private Func<IAudioDevice, bool> _isHidden = _ => false;
 
     public DeviceCollectionViewModel(IAudioDeviceManager deviceManager, AppSettings settings)
     {
@@ -62,7 +63,36 @@ public class DeviceCollectionViewModel : BindableBase, IDisposable
             }
             SetDefault(device);
         }
+
+        // The previous default may have been kept visible only because it was the default.
+        RefreshHiddenDevices();
     }
+
+    // Hides devices from AllDevices (flyout, mixer window, tray menu). The default device is always shown.
+    public void SetHiddenDeviceFilter(Func<IAudioDevice, bool> isHidden)
+    {
+        _isHidden = isHidden;
+        RefreshHiddenDevices();
+    }
+
+    public void RefreshHiddenDevices()
+    {
+        foreach (var device in _deviceManager.Devices)
+        {
+            var existing = AllDevices.FirstOrDefault(d => d.Id == device.Id);
+            var isShown = IsShown(device);
+            if (isShown && existing == null)
+            {
+                AddDevice(device);
+            }
+            else if (!isShown && existing != null)
+            {
+                AllDevices.Remove(existing);
+            }
+        }
+    }
+
+    private bool IsShown(IAudioDevice device) => device.Id == Default?.Id || !_isHidden(device);
 
     private void SetDefault(DeviceViewModel device)
     {
@@ -107,7 +137,7 @@ public class DeviceCollectionViewModel : BindableBase, IDisposable
             case NotifyCollectionChangedAction.Add:
                 var added = ((IAudioDevice)e.NewItems[0]);
                 var allExistingAdded = AllDevices.FirstOrDefault(d => d.Id == added.Id);
-                if (allExistingAdded == null)
+                if (allExistingAdded == null && IsShown(added))
                 {
                     AddDevice(added);
                 }
@@ -124,7 +154,7 @@ public class DeviceCollectionViewModel : BindableBase, IDisposable
 
             case NotifyCollectionChangedAction.Reset:
                 AllDevices.Clear();
-                foreach (var device in _deviceManager.Devices)
+                foreach (var device in _deviceManager.Devices.Where(IsShown))
                 {
                     AddDevice(device);
                 }

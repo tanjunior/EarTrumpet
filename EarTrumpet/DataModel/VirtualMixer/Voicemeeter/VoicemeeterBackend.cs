@@ -22,10 +22,14 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
         [3] = new("Voicemeeter Potato", 5, [Vaio, Aux, Vaio3]),
     };
 
+    // Windows names every Voicemeeter virtual playback device "<name> (VB-Audio Voicemeeter VAIO)".
+    private const string DeviceNameSuffix = " (VB-Audio Voicemeeter VAIO)";
+
     private readonly VoicemeeterRemote _remote;
     private readonly bool _isLoggedIn;
     private Edition _edition;
     private VoicemeeterStrip[] _strips = [];
+    private HashSet<string> _usedDevices = [];
 
     public VoicemeeterBackend()
     {
@@ -42,9 +46,15 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
     }
 
     public event EventHandler StripsChanged;
+    public event EventHandler UsedDevicesChanged;
 
     public string DisplayName => _edition?.Name;
     public IReadOnlyList<IVirtualStrip> Strips => _strips;
+
+    public bool IsUnusedDevice(string deviceDisplayName) =>
+        _edition != null &&
+        deviceDisplayName.EndsWith(DeviceNameSuffix, StringComparison.Ordinal) &&
+        !_usedDevices.Contains(TrimDeviceNameSuffix(deviceDisplayName));
 
     public void Update(bool includeLevels)
     {
@@ -65,6 +75,10 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
 
         if (_edition == null)
         {
+            if (isNewEdition)
+            {
+                SetUsedDevices([]);
+            }
             return;
         }
 
@@ -75,6 +89,7 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
             {
                 strip.RefreshParameters();
             }
+            SetUsedDevices(ReadUsedDevices());
         }
 
         if (includeLevels)
@@ -93,6 +108,34 @@ public sealed class VoicemeeterBackend : IVirtualMixerBackend
             _remote.Logout();
         }
     }
+
+    // Virtual devices feeding a virtual strip, plus any virtual device picked as a hardware strip's input
+    // (the paid VAIO Extension devices "Voicemeeter In 1-5" only work that way).
+    private HashSet<string> ReadUsedDevices()
+    {
+        var used = _strips.Where(s => s.WindowsDeviceName != null).Select(s => s.WindowsDeviceName).ToHashSet();
+        for (var i = 0; i < _edition.HardwareStrips; i++)
+        {
+            var device = _remote.GetString($"Strip[{i}].device.name");
+            if (!string.IsNullOrEmpty(device))
+            {
+                used.Add(TrimDeviceNameSuffix(device));
+            }
+        }
+        return used;
+    }
+
+    private void SetUsedDevices(HashSet<string> used)
+    {
+        if (!used.SetEquals(_usedDevices))
+        {
+            _usedDevices = used;
+            UsedDevicesChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    private static string TrimDeviceNameSuffix(string name) =>
+        name.EndsWith(DeviceNameSuffix, StringComparison.Ordinal) ? name[..^DeviceNameSuffix.Length] : name;
 
     private VoicemeeterStrip[] CreateStrips(Edition edition)
     {

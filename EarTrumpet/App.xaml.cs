@@ -121,6 +121,10 @@ public sealed partial class App : IDisposable
 
         _flyoutViewModel = new FlyoutViewModel(CollectionViewModel, () => _trayIcon.SetFocus(), Settings, new VirtualMixerViewModel(virtualMixerBackend));
         FlyoutWindow = new FlyoutWindow(_flyoutViewModel);
+
+        CollectionViewModel.SetHiddenDeviceFilter(device => virtualMixerBackend.IsUnusedDevice(device.DisplayName));
+        virtualMixerBackend.UsedDevicesChanged += (_, __) => CollectionViewModel.RefreshHiddenDevices();
+        virtualMixerBackend.Update(includeLevels: false);
         // Initialize the FlyoutWindow last because its Show/Hide cycle will pump messages, causing UI frames
         // to be executed, breaking the assumption that startup is complete.
         FlyoutWindow.Initialize();

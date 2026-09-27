@@ -15,6 +15,13 @@ public interface IVirtualMixerBackend : IDisposable
     // Raised when Strips is replaced (connect, disconnect, or a different mixer edition started).
     event EventHandler StripsChanged;
 
+    // Raised when the result of IsUnusedDevice may have changed.
+    event EventHandler UsedDevicesChanged;
+
+    // True for a Windows playback device the mixer installs but isn't using (e.g. an unlicensed
+    // extension input). Always false while the mixer isn't running.
+    bool IsUnusedDevice(string deviceDisplayName);
+
     // Pulls state from the mixer. Must be called on the UI thread; cheap enough to call at meter rate.
     void Update(bool includeLevels);
 }
